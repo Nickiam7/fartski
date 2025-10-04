@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Fartski</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: white;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 2.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .fart-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 15px;
+            width: 100%;
+            max-width: 600px;
+        }
+
+        .fart-button {
+            background: white;
+            border: none;
+            border-radius: 15px;
+            padding: 20px 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #4a5568;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            text-transform: capitalize;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .fart-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+
+        .fart-button:active {
+            transform: scale(0.95);
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        .fart-button.playing {
+            animation: pulse 0.5s ease-in-out;
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        .emoji {
+            display: block;
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+
+            .fart-grid {
+                grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+                gap: 10px;
+            }
+
+            .fart-button {
+                padding: 15px 8px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>💨 Fartski 💨</h1>
+    <div class="fart-grid" id="fartGrid">
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="fart.js"></script>
+    <script>
+        const fartEmojis = {
+            toot: '🎺',
+            ripper: '💥',
+            plop: '💩',
+            squit: '💦',
+            raspberry: '👅',
+            squat: '🏋️',
+            tuppence: '💷',
+            liftoff: '🚀',
+            trumpet: '🎺',
+            fizzler: '✨',
+            windy: '🌬️',
+            eine: '🇩🇪',
+            fartception: '🌀',
+            fartpoint1: '📍'
+        };
+
+        const fartSounds = {
+            toot: 'toot',
+            ripper: 'ripper',
+            plop: 'plop',
+            squit: 'squit',
+            raspberry: 'raspberry',
+            squat: 'squat',
+            tuppence: 'tuppence',
+            liftoff: 'liftoff',
+            trumpet: 'trumpet',
+            fizzler: 'fizzler',
+            windy: 'windy',
+            eine: 'eine',
+            fartception: 'fartception',
+            fartpoint1: 'fartpoint1'
+        };
+
+        const fart = new Fart({
+            volume: 70,
+            loop: false
+        });
+
+        const fartGrid = document.getElementById('fartGrid');
+
+        Object.keys(fartSounds).forEach(fartName => {
+            const button = document.createElement('button');
+            button.className = 'fart-button';
+            button.innerHTML = `
+                <span class="emoji">${fartEmojis[fartName] || '💨'}</span>
+                ${fartName}
+            `;
+
+            button.addEventListener('click', function() {
+                document.querySelectorAll('.fart-button').forEach(btn => {
+                    btn.classList.remove('playing');
+                });
+
+                this.classList.add('playing');
+
+                fart.play(fartName, () => {
+                    this.classList.remove('playing');
+                });
+            });
+
+            fartGrid.appendChild(button);
+        });
+    </script>
+</body>
+</html>
