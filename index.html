@@ -130,31 +130,50 @@
             fartpoint1: '📍'
         };
 
-        const fartSounds = {
-            toot: 'toot',
-            ripper: 'ripper',
-            plop: 'plop',
-            squit: 'squit',
-            raspberry: 'raspberry',
-            squat: 'squat',
-            tuppence: 'tuppence',
-            liftoff: 'liftoff',
-            trumpet: 'trumpet',
-            fizzler: 'fizzler',
-            windy: 'windy',
-            eine: 'eine',
-            fartception: 'fartception',
-            fartpoint1: 'fartpoint1'
+        const fartFiles = {
+            toot: 'fart1',
+            ripper: 'fart2',
+            plop: 'fart3',
+            squit: 'fart4',
+            raspberry: 'fart5',
+            squat: 'fart6',
+            tuppence: 'fart7',
+            liftoff: 'fart8',
+            trumpet: 'fart9',
+            fizzler: 'fart10',
+            windy: 'fart11',
+            eine: 'fart12',
+            fartception: 'fart13',
+            fartpoint1: 'fart14'
         };
 
-        const fart = new Fart({
-            volume: 70,
-            loop: false
-        });
+        // Preload all audio files
+        const audioCache = {};
+        let audioContext;
+        
+        // Initialize audio context on first user interaction
+        function initAudioContext() {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        // Preload sounds
+        function preloadSounds() {
+            Object.keys(fartFiles).forEach(fartName => {
+                const audio = new Audio();
+                audio.preload = 'auto';
+                audio.src = `https://www.jsfart.com/farts/${fartFiles[fartName]}.mp3`;
+                audioCache[fartName] = audio;
+            });
+        }
+
+        // Call preload immediately
+        preloadSounds();
 
         const fartGrid = document.getElementById('fartGrid');
 
-        Object.keys(fartSounds).forEach(fartName => {
+        Object.keys(fartFiles).forEach(fartName => {
             const button = document.createElement('button');
             button.className = 'fart-button';
             button.innerHTML = `
@@ -162,16 +181,40 @@
                 ${fartName}
             `;
 
-            button.addEventListener('click', function() {
+            // Use touchstart for mobile, click for desktop
+            const playFart = function(e) {
+                e.preventDefault();
+                
+                // Initialize audio context on first interaction
+                initAudioContext();
+                
                 document.querySelectorAll('.fart-button').forEach(btn => {
                     btn.classList.remove('playing');
                 });
 
                 this.classList.add('playing');
 
-                fart.play(fartName, () => {
-                    this.classList.remove('playing');
-                });
+                // Use cached audio
+                const audio = audioCache[fartName];
+                if (audio) {
+                    // Reset and play
+                    audio.currentTime = 0;
+                    audio.play().catch(err => {
+                        console.error('Error playing sound:', err);
+                    });
+                    
+                    audio.onended = () => {
+                        this.classList.remove('playing');
+                    };
+                }
+            };
+
+            // Add both touch and click handlers
+            button.addEventListener('touchstart', playFart, {passive: false});
+            button.addEventListener('click', function(e) {
+                // Prevent double firing on devices that trigger both
+                if (e.detail === 0) return;
+                playFart.call(this, e);
             });
 
             fartGrid.appendChild(button);
